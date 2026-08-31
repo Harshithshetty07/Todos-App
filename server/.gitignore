@@ -1,0 +1,10 @@
+/TodoApi/bin
+
+/TodoApi/obj
+
+/TodoApi/Migrations
+/TodoApi/Properties
+
+patran_conf.ini
+TodoApi.http
+patran.ses.01
