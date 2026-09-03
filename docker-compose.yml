@@ -1,0 +1,39 @@
+services:
+
+  backend:
+    build:
+      context: ./server/TodoApi
+      dockerfile: Dockerfile
+
+    container_name: todo-aspnet
+
+    ports:
+      - "7501:7501"
+
+    environment:
+      ASPNETCORE_URLS: http://+:7501
+
+    volumes:
+      - todo-data:/app/data
+
+    restart: unless-stopped
+
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+
+    container_name: todo-frontend
+
+    ports:
+      - "3035:80"
+
+    depends_on:
+      - backend
+
+    restart: unless-stopped
+
+
+volumes:
+  todo-data:

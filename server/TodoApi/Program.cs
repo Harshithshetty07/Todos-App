@@ -4,40 +4,45 @@ using TodoApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Controllers
 builder.Services.AddControllers();
 
-// EF Core (SQLite)
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    ));
 
-// Services
 builder.Services.AddScoped<ITodoService, TodoService>();
 
-// CORS for React dev server
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp", policy =>
-        policy.WithOrigins("http://localhost:3000")
-              .AllowAnyHeader()
-              .AllowAnyMethod());
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
 });
 
-// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+using (var scope = app.Services.CreateScope())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    db.Database.Migrate();
 }
 
-app.UseCors("AllowReactApp");
-app.UseHttpsRedirection();
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseCors("Frontend");
+
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();
